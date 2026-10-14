@@ -22,11 +22,7 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
-          os-version: '33'
-          api-level: '33'
-          build-tools: '34.0.0'
-          cmdline-tools-version: '11076708_latest'
-          accept-sdk-licenses: true
+          
 
       - name: Build APK
         run: |
