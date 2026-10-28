@@ -6,36 +6,47 @@ on:
   push:
     paths:
       - '.github/workflows/build.yml'
+      - '*.html'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradle.properties'
+      - 'app/**'
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up JDK
+      - name: Set up Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v4
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Prepare HTML assets
+        run: |
+          mkdir -p app/src/main/assets/pages
+          cp home.html app/src/main/assets/home.html
+          cp main-menu.html app/src/main/assets/pages/
+          cp channels.html app/src/main/assets/pages/
+          cp manual-matches.html app/src/main/assets/pages/
+          cp auto-matches.html app/src/main/assets/pages/
+          cp player.html app/src/main/assets/pages/
 
       - name: Build APK
-        run: |
-          chmod +x gradlew || true
-          if [ -f gradlew ]; then
-              ./gradlew assembleDebug
-          else
-              echo "Gradle wrapper missing"
-              exit 1
-          fi
+        run: gradle assembleDebug
 
       - name: Upload APK
-        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: Yalla-Kora-APK
           path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
