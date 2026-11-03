@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "436550928755",
+    "firebase_url": "https://yalla-kora-9ec86-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "yalla-kora-9ec86",
+    "storage_bucket": "yalla-kora-9ec86.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:436550928755:android:4f21365f8dd1d0c921dd06",
+        "android_client_info": {
+          "package_name": "com.koralive.com"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAIJcMJPdN8HfODn7LYTEhMRKg06_iKYeo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
