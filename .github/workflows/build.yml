@@ -1,25 +1,90 @@
+الكتابة
 name: Build Yalla Kora APK
+
 on:
   workflow_dispatch:
   push:
     branches: [ main ]
+
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+
       - uses: android-actions/setup-android@v3
+
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-      - name: Verify Firebase config
-        run: test -f app/google-services.json || (echo "Missing app/google-services.json for Firebase Android app com.koralive.com" && exit 1)
-      - name: Build debug APK
+
+      - name: Prepare Android project
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          test -s index.html
+          test -s AndroidManifest.xml
+          test -s MainActivity.java
+          test -s MyFirebaseMessagingService.java
+          test -s google-services.json
+
+          mkdir -p app/src/main/assets
+          mkdir -p app/src/main/java/com/yallkora/com
+
+          cp index.html app/src/main/assets/index.html
+          cp AndroidManifest.xml app/src/main/AndroidManifest.xml
+          cp MainActivity.java app/src/main/java/com/yallkora/com/
+          cp MyFirebaseMessagingService.java app/src/main/java/com/yallkora/com/
+          cp google-services.json app/google-services.json
+
+          cat > build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.7.3' apply false
+              id 'com.google.gms.google-services' version '4.4.4' apply false
+          }
+          EOF
+
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+              id 'com.google.gms.google-services'
+          }
+
+          android {
+              namespace 'com.yallkora.com'
+              compileSdk 35
+
+              defaultConfig {
+                  applicationId 'com.koralive.com'
+                  minSdk 21
+                  targetSdk 35
+                  versionCode 2
+                  versionName '1.1'
+              }
+          }
+
+          dependencies {
+              implementation 'androidx.activity:activity:1.10.1'
+              implementation 'androidx.core:core:1.15.0'
+              implementation platform('com.google.firebase:firebase-bom:34.5.0')
+              implementation 'com.google.firebase:firebase-messaging'
+          }
+          EOF
+
+      - name: Verify Firebase
+        run: |
+          python3 -c "import json; d=json.load(open('app/google-services.json')); assert any(c.get('client_info',{}).get('android_client_info',{}).get('package_name')=='com.koralive.com' for c in d['client']), 'Firebase package mismatch'; print('Firebase OK')"
+
+      - name: Build APK
         run: gradle assembleDebug
+
       - uses: actions/upload-artifact@v4
         with:
           name: Yalla-Kora-APK
